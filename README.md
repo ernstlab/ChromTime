@@ -108,7 +108,7 @@ Where `input_order` contains
 All output files will be stored in the directory specified by the `-o` option. Each file will be prefixed with the label given by the `-p` option, if it is specified. 
 Here is an example output generated from the above order file:
 
-###Predictions for each time point
+<b>Predictions for each time point</b>
         
     t_cell_development.H3K4ME2.FLDN1_H3K4me2.merged.chr19.ChromTime_timepoint_predictions.bed.gz
     t_cell_development.H3K4ME2.FLDN2a_H3K4me2.merged.chr19.ChromTime_timepoint_predictions.bed.gz
@@ -128,16 +128,16 @@ For example:
     chr19	36978600	36979400	chr19-1001-1#S-S-S-S/S-S-S-S	1000	.	36978600	36979400	90,90,90
 
     
-###Full output from ChromTime that contains extra information like posterior probabilities    
+<b>Full output from ChromTime that contains extra information like posterior probabilities</b>    
  
     t_cell_development.H3K4ME2.ChromTime_full_output.bed.gz 
 
-###Learned model and intermediate data stored in pickle format
+<b>Learned model and intermediate data stored in pickle format</b>
 
     t_cell_development.H3K4ME2.data.pickle
     t_cell_development.H3K4ME2.model.pickle
 
-###Initial block boundaries and significant bins for each time point
+<b>Initial block boundaries and significant bins for each time point</b>
     
     t_cell_development.H3K4ME2_FLDN1_H3K4me2.merged.chr19.block_boundaries.bed.gz
     t_cell_development.H3K4ME2_FLDN1_H3K4me2.merged.chr19.significant_bins.bed.gz
@@ -146,7 +146,7 @@ For example:
     t_cell_development.H3K4ME2_ThyDN3_H3K4me2.merged.chr19.significant_bins.bed.gz
     t_cell_development.H3K4ME2_ThyDP_H3K4me2.merged.chr19.significant_bins.bed.gz
     
-###Observed and expected read counts and RPKM values in wiggle format for each time point
+<b>Observed and expected read counts and RPKM values in wiggle format for each time point</b>
         
     t_cell_development.H3K4ME2_FLDN1_H3K4me2.merged.chr19.READ_COUNTS.wig.gz
     t_cell_development.H3K4ME2_FLDN1_H3K4me2.merged.chr19.EXPECTED.wig.gz
@@ -168,7 +168,7 @@ For example:
     t_cell_development.H3K4ME2_ThyDP_H3K4me2.merged.chr19.EXPECTED.wig.gz
     t_cell_development.H3K4ME2_ThyDP_H3K4me2.merged.chr19.RPKM.wig.gz
 
-###ChromTime log file
+<b>ChromTime log file</b>
 
     t_cell_development.H3K4ME2.log
 
