@@ -1,0 +1,5 @@
+data/FLDN1_H3K4me2.merged.chr19.bed.gz	data/FLDN1_Input_rep1.chr19.bed.gz
+data/FLDN2a_H3K4me2.merged.chr19.bed.gz	data/FLDN2a_Input_rep1.chr19.bed.gz
+data/FLDN2b_H3K4me2.merged.chr19.bed.gz	data/FLDN2b_Input_rep1.chr19.bed.gz
+data/ThyDN3_H3K4me2.merged.chr19.bed.gz	data/ThyDN3_Input_rep1.chr19.bed.gz
+data/ThyDP_H3K4me2.merged.chr19.bed.gz	data/ThyDP_Input_rep1.chr19.bed.gz
