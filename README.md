@@ -86,15 +86,13 @@ There are two ways specify the input fo ChromTime:
 
 1) Specify a space-separated list of files for each time point with the `-a` and `-c` options. The files should be in the right order according to the time course. For example:
 
- 
-    python ~/software/ChromTime/ChromTime.py -a data/FLDN1_H3K4me2.merged.chr19.bed.gz data/FLDN2a_H3K4me2.merged.chr19.bed.gz data/FLDN2b_H3K4me2.merged.chr19.bed.gz data/ThyDN3_H3K4me2.merged.chr19.bed.gz data/ThyDP_H3K4me2.merged.chr19.bed.gz -c data/FLDN1_Input_rep1.chr19.bed.gz data/FLDN2a_Input_rep1.chr19.bed.gz data/FLDN2b_Input_rep1.chr19.bed.gz data/ThyDN3_Input_rep1.chr19.bed.gz data/ThyDP_Input_rep1.chr19.bed.gz -o t_cell_development.H3K4ME2 -p t_cell_development.H3K4ME2 -t 4 -g mm9
+        python ~/software/ChromTime/ChromTime.py -a data/FLDN1_H3K4me2.merged.chr19.bed.gz data/FLDN2a_H3K4me2.merged.chr19.bed.gz data/FLDN2b_H3K4me2.merged.chr19.bed.gz data/ThyDN3_H3K4me2.merged.chr19.bed.gz data/ThyDP_H3K4me2.merged.chr19.bed.gz -c data/FLDN1_Input_rep1.chr19.bed.gz data/FLDN2a_Input_rep1.chr19.bed.gz data/FLDN2b_Input_rep1.chr19.bed.gz data/ThyDN3_Input_rep1.chr19.bed.gz data/ThyDP_Input_rep1.chr19.bed.gz -o t_cell_development.H3K4ME2 -p t_cell_development.H3K4ME2 -t 4 -g mm9
 
 2) Specify a tab-separated text file with the path to ChIP-seq and background reads for each time point with the `-i` option. 
 The file names should come in the correct order according the time course (i.e. line 1 corresponds to time point 1, line 2 to time point 2 and so on)
 Paths can be either relative or absolute. For example:
-
-
-    python ~/software/ChromTime/ChromTime.py -i input_order -o t_cell_development.H3K4ME2 -p t_cell_development.H3K4ME2 -t 4 -g mm9
+    
+        python ~/software/ChromTime/ChromTime.py -i input_order -o t_cell_development.H3K4ME2 -p t_cell_development.H3K4ME2 -t 4 -g mm9
 
 Where `input_order` contains
 
@@ -104,10 +102,6 @@ Where `input_order` contains
     data/ThyDN3_H3K4me2.merged.chr19.bed.gz	data/ThyDN3_Input_rep1.chr19.bed.gz
     data/ThyDP_H3K4me2.merged.chr19.bed.gz	data/ThyDP_Input_rep1.chr19.bed.gz
     
-
-#####Sample usage
-
-    python ~/software/ChromTime/ChromTime.py -i t_cell_development.H3K4ME2.merged.input_reads -o t_cell_development.H3K4ME2.merged -p t_cell_development.H3K4ME2.merged -t 4 -g mm9
 
 ## Output
 
