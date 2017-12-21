@@ -96,13 +96,15 @@ def call_peaks(foreground_read_counts, total_foreground_reads,
                bin_size,
                p_value_extend,
                q_value_seed,
-               min_gap):
+               min_gap,
+               min_expected_reads):
 
     SHORT_WINDOW = max(1, 500 / bin_size)   # 1 kb / 2
     MEDIUM_WINDOW = max(1, 2500 / bin_size) # 5 kb / 2
     LONG_WINDOW = max(1, 10000 / bin_size)  # 10 kb / 2
 
-    pseudo_one_read = float(total_background_reads) / total_foreground_reads
+    pseudo_one_read = float(min_expected_reads * total_background_reads) / total_foreground_reads
+
     n_total_bins = sum(len(bins) for bins in foreground_read_counts.itervalues())
 
     mean_background_reads = float(total_background_reads) / n_total_bins
@@ -461,7 +463,8 @@ def determine_block_boundaries(aligned_fnames,
                                min_gap,
                                out_prefix,
                                chrom_lengths,
-                               output_signal_files):
+                               output_signal_files,
+                               min_expected_reads):
     peaks = []
 
     foreground_read_counts = []
@@ -513,7 +516,8 @@ def determine_block_boundaries(aligned_fnames,
                                                      bin_size,
                                                      p_value_extend=p_value_extend,
                                                      q_value_seed=q_value_seed,
-                                                     min_gap=min_gap)
+                                                     min_gap=min_gap,
+                                                     min_expected_reads=min_expected_reads)
 
         peaks.append(t_peaks)
 
@@ -643,6 +647,12 @@ if __name__ == '__main__':
                         help='FDR threshold to call significant bins (Default: %(default)s)',
                         default=0.15)
 
+    parser.add_argument('--min-expected-reads',
+                        type=int,
+                        dest='min_expected_reads',
+                        help='Minimum expected reads per bin for the background component (Default: %(default)s)',
+                        default=1)
+
     parser.add_argument('--min-gap',
                         type=int,
                         dest='min_gap',
@@ -680,9 +690,11 @@ if __name__ == '__main__':
                              "Equivalent to \"-b 500 --min-gap 1500 --merge-peaks\" (%(default)s)")
 
     parser.add_argument("--atac", action="store_true", dest="atac", default=False,
-                        help="Use default settings for ATAC-seq marks. "
-                             "Equivalent to \"-b 50 --min-gap 150 -s 5 \" (%(default)s). "
-                             "This option has not been tested extensively, so use with caution.")
+                        help=argparse.SUPPRESS,
+                        # help="Use default settings for ATAC-seq marks. "
+                        #      "Equivalent to \"-b 50 --min-gap 150 -s 5 \" (%(default)s). "
+                        #      "This option has not been tested extensively, so use with caution."
+                        )
 
     parser.add_argument("--output_empty_blocks", action="store_true", dest="output_empty_blocks", default=False,
                         help=argparse.SUPPRESS)
@@ -791,7 +803,8 @@ if __name__ == '__main__':
                                             min_gap=min_gap / bin_size,
                                             out_prefix=out_prefix,
                                             chrom_lengths=chrom_lengths,
-                                            output_signal_files=not args.no_output_signal_files)
+                                            output_signal_files=not args.no_output_signal_files,
+                                            min_expected_reads=args.min_expected_reads)
 
         with open(out_prefix + '.data.pickle', 'w') as outf:
             echo('Storing blocks in:', out_prefix + '.data.pickle')
