@@ -16,12 +16,14 @@ After the compilation has finished, you should be able to run ChromTime by typin
     $ python ChromTime.py
     usage: ChromTime.py [-h] [-a ALIGNED_FNAMES [ALIGNED_FNAMES ...]]
                         [-c CONTROL_FNAMES [CONTROL_FNAMES ...]] [-i ORDER_FNAME]
-                        [-g GENOME] [-o DIRECTORY] [-b INT] [-t INT] [-s SHIFT]
-                        [-q FDR_FOR_DECODING] [--q-value-seed Q_VALUE_SEED]
-                        [--p-value-extend P_VALUE_EXTEND] [--min-gap MIN_GAP]
-                        [-n INT] [-m FILE] [-d FILE] [-p PREFIX] [--skip-training]
-                        [--merge-peaks] [--no-output-signal-files] [--broad]
-                        [--atac]
+                        [-g GENOME] [-o DIRECTORY] [-p PREFIX] [-b INT] [-t INT]
+                        [-s SHIFT] [-q FDR_FOR_DECODING]
+                        [--q-value-seed Q_VALUE_SEED]
+                        [--p-value-extend P_VALUE_EXTEND]
+                        [--min-expected-reads MIN_EXPECTED_READS]
+                        [--min-gap MIN_GAP] [-n INT] [-m FILE] [-d FILE]
+                        [--skip-training] [--merge-peaks]
+                        [--no-output-signal-files] [--broad] [--atac]
     
     ChromTime: Modeling Spatio-temporal Dynamics of Chromatin Marks
     
@@ -42,6 +44,8 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             to a file with chromosome sizes one per line
       -o DIRECTORY, --output-dir DIRECTORY
                             Output directory
+      -p PREFIX, --prefix PREFIX
+                            prefix for the output files
       -b INT, --bin-size INT
                             Bin size in base pairs (Default: 200)
       -t INT, --threads INT
@@ -55,6 +59,9 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             FDR threshold to call significant bins (Default: 0.05)
       --p-value-extend P_VALUE_EXTEND
                             FDR threshold to call significant bins (Default: 0.15)
+      --min-expected-reads MIN_EXPECTED_READS
+                            Minimum expected reads per bin for the background
+                            component (Default: 1)
       --min-gap MIN_GAP     Minimum gap between significant regions before they
                             are joined (Default: 600)
       -n INT, --n-training-examples INT
@@ -63,8 +70,6 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             Pickled model file to load a learned the model from
       -d FILE, --data-file FILE
                             Pickled data file to load
-      -p PREFIX, --prefix PREFIX
-                            prefix for the output files
       --skip-training       Skip EM training (False)
       --merge-peaks         Merge significant peaks across time points instead of
                             splitting them (False)
@@ -73,6 +78,9 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             wiggle format (False)
       --broad               Use default settings for broad marks. Equivalent to
                             "-b 500 --min-gap 1500 --merge-peaks" (False)
+      --atac                Use default settings for ATAC-seq marks. Equivalent to
+                            "-b 50 --min-gap 150 -s 5 " (False). This option has
+                            not been tested extensively, so use with caution.
     
 ## Input
 

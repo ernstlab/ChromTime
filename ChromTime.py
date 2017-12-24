@@ -100,8 +100,8 @@ def call_peaks(foreground_read_counts, total_foreground_reads,
                min_expected_reads):
 
     SHORT_WINDOW = max(1, 500 / bin_size)   # 1 kb / 2
-    MEDIUM_WINDOW = max(1, 2500 / bin_size) # 5 kb / 2
-    LONG_WINDOW = max(1, 10000 / bin_size)  # 10 kb / 2
+    MEDIUM_WINDOW = max(1, 2500 / bin_size)  # 5 kb / 2
+    LONG_WINDOW = max(1, 10000 / bin_size)  # 20 kb / 2
 
     pseudo_one_read = float(min_expected_reads * total_background_reads) / total_foreground_reads
 
@@ -281,7 +281,9 @@ def new_block(block_id,
 
     # If the region is too long, it has to be split at a point that is contained
     # in the peaks at all time points. We are going to cache the top positions with the maximum
-    # mean of normalized signal, so that later we can pick where to split
+    # mean of normalized signal, so that later we can pick where to split.
+    # Only the first position is used during the EM, but all positions are used by the Viterbi decoding to
+    # find the best assignment.
 
     block[SPLIT_POINT] = list(sorted(range(block_length + 1),
                                      reverse=True,
@@ -614,6 +616,9 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output-dir", dest="out_dir",
                         help="Output directory", metavar="DIRECTORY")
 
+    parser.add_argument("-p", "--prefix", dest="prefix",
+                        help="prefix for the output files")
+
     parser.add_argument("-b", "--bin-size", type=int, dest="bin_size", default=200,
                         help="Bin size in base pairs (Default: %(default)s)", metavar="INT")
 
@@ -673,9 +678,6 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--data-file", dest="data_fname",
                         help="Pickled data file to load", metavar="FILE")
 
-    parser.add_argument("-p", "--prefix", dest="prefix",
-                        help="prefix for the output files")
-
     parser.add_argument("--skip-training", action="store_true", dest="skip_training", default=False,
                         help="Skip EM training (%(default)s)")
 
@@ -690,10 +692,10 @@ if __name__ == '__main__':
                              "Equivalent to \"-b 500 --min-gap 1500 --merge-peaks\" (%(default)s)")
 
     parser.add_argument("--atac", action="store_true", dest="atac", default=False,
-                        help=argparse.SUPPRESS,
-                        # help="Use default settings for ATAC-seq marks. "
-                        #      "Equivalent to \"-b 50 --min-gap 150 -s 5 \" (%(default)s). "
-                        #      "This option has not been tested extensively, so use with caution."
+                        # help=argparse.SUPPRESS,
+                        help="Use default settings for ATAC-seq marks. "
+                             "Equivalent to \"-b 50 --min-gap 150 -s 5 \" (%(default)s). "
+                             "This option has not been tested extensively, so use with caution."
                         )
 
     parser.add_argument("--output_empty_blocks", action="store_true", dest="output_empty_blocks", default=False,
