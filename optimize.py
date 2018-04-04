@@ -471,6 +471,9 @@ def optimize_a_pair_of_NegBinomials_jointly_shared_beta(peak_signal_array,
 
         diff = cur_likelihood - prev_likelihood
 
+    if cur_fgr_delta < 0.001:
+        raise NegBinomialOptimizationFailure
+
     return cur_fgr_delta, cur_fgr_betas, cur_bgr_delta, cur_bgr_betas, timepoint_idx
 
 
@@ -547,6 +550,9 @@ def optimize_NegBinomial(y, x, weights, init_betas):
         cur_likelihood = log_likelihood(weights, cur_delta, y, predicted_diff_means)
 
         diff = cur_likelihood - prev_likelihood
+
+    if cur_delta < 0.001:
+        raise NegBinomialOptimizationFailure
 
     return cur_delta, cur_betas
 

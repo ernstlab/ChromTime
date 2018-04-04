@@ -97,11 +97,17 @@ def call_peaks(foreground_read_counts, total_foreground_reads,
                p_value_extend,
                q_value_seed,
                min_gap,
-               min_expected_reads):
+               min_expected_reads,
+               use_broad_window_for_background=False):
 
     SHORT_WINDOW = max(1, 500 / bin_size)   # 1 kb / 2
     MEDIUM_WINDOW = max(1, 2500 / bin_size)  # 5 kb / 2
     LONG_WINDOW = max(1, 10000 / bin_size)  # 20 kb / 2
+
+    if use_broad_window_for_background:
+        background_read_counts = foreground_read_counts
+        total_background_reads = total_foreground_reads
+        LONG_WINDOW = max(1, 25000 / bin_size)  # 50 kb / 2
 
     pseudo_one_read = float(min_expected_reads * total_background_reads) / total_foreground_reads
 
@@ -163,18 +169,25 @@ def call_peaks(foreground_read_counts, total_foreground_reads,
             else:
                 long_window_length -= 1
 
-            if total_background_reads > 0:
-
-                bgr_reads = max(float(short_window) / short_window_length,
-                                float(medium_window) / medium_window_length,
-                                float(long_window) / long_window_length,
-                                mean_background_reads
-                                ,pseudo_one_read
+            if use_broad_window_for_background:
+                bgr_reads = max(float(long_window) / long_window_length,
+                                mean_background_reads,
+                                pseudo_one_read
                                 )
-
                 expected_reads = total_foreground_reads * bgr_reads / float(total_background_reads)
             else:
-                expected_reads = max(1., total_foreground_reads / float(n_total_bins))
+                if total_background_reads > 0:
+
+                    bgr_reads = max(float(short_window) / short_window_length,
+                                    float(medium_window) / medium_window_length,
+                                    float(long_window) / long_window_length,
+                                    mean_background_reads
+                                    ,pseudo_one_read
+                                    )
+
+                    expected_reads = total_foreground_reads * bgr_reads / float(total_background_reads)
+                else:
+                    expected_reads = max(1., total_foreground_reads / float(n_total_bins))
 
             # cache the Poisson test
             key = (fgr_reads - 1, expected_reads)
@@ -466,7 +479,8 @@ def determine_block_boundaries(aligned_fnames,
                                out_prefix,
                                chrom_lengths,
                                output_signal_files,
-                               min_expected_reads):
+                               min_expected_reads,
+                               use_broad_window_for_background=False):
     peaks = []
 
     foreground_read_counts = []
@@ -519,7 +533,8 @@ def determine_block_boundaries(aligned_fnames,
                                                      p_value_extend=p_value_extend,
                                                      q_value_seed=q_value_seed,
                                                      min_gap=min_gap,
-                                                     min_expected_reads=min_expected_reads)
+                                                     min_expected_reads=min_expected_reads,
+                                                     use_broad_window_for_background=use_broad_window_for_background)
 
         peaks.append(t_peaks)
 
@@ -701,6 +716,21 @@ if __name__ == '__main__':
     parser.add_argument("--output_empty_blocks", action="store_true", dest="output_empty_blocks", default=False,
                         help=argparse.SUPPRESS)
 
+    parser.add_argument("--keep-fixed-priors", action="store_true", dest="keep_fixed_priors", default=False,
+                        help=argparse.SUPPRESS)
+
+    parser.add_argument("--min-dynamic-prior",
+                        type=float,
+                        dest="min_dynamic_prior",
+                        default=0.0,
+                        help=argparse.SUPPRESS)
+
+    parser.add_argument("--use-broad-window-for-background",
+                        action="store_true",
+                        dest="use_broad_window_for_background",
+                        default=False,
+                        help=argparse.SUPPRESS)
+
     args = parser.parse_args()
 
     # if no options were given by the user, print help and exit
@@ -806,7 +836,8 @@ if __name__ == '__main__':
                                             out_prefix=out_prefix,
                                             chrom_lengths=chrom_lengths,
                                             output_signal_files=not args.no_output_signal_files,
-                                            min_expected_reads=args.min_expected_reads)
+                                            min_expected_reads=args.min_expected_reads,
+                                            use_broad_window_for_background=args.use_broad_window_for_background)
 
         with open(out_prefix + '.data.pickle', 'w') as outf:
             echo('Storing blocks in:', out_prefix + '.data.pickle')
@@ -826,6 +857,8 @@ if __name__ == '__main__':
                            aligned_fnames=aligned_fnames,
                            out_prefix=out_prefix,
                            fdr_for_decoding=args.fdr_for_decoding,
-                           output_empty_blocks=args.output_empty_blocks)
+                           output_empty_blocks=args.output_empty_blocks,
+                           update_priors=not args.keep_fixed_priors,
+                           min_dynamic_prior=args.min_dynamic_prior)
 
     close_log()

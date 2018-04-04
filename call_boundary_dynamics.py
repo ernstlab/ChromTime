@@ -148,11 +148,16 @@ class ClusterModel:
                  # min_lambda,
                  # max_lambda,
                  bin_size,
-                 n_covariates):
+                 n_covariates,
+                 update_priors,
+                 min_dynamic_prior):
 
         self.n_threads = n_threads
         self.bin_size = bin_size
         self.n_timepoints = n_timepoints
+
+        # self.update_priors = True
+        self.min_dynamic_prior = min_dynamic_prior
 
         self.max_region_length = max_region_length
         # self.min_lambda = min_lambda
@@ -215,8 +220,13 @@ class ClusterModel:
 
         # self.print_model()
 
-    def save_model(self):
-        with open(self.model_fname, 'w') as model_f:
+    def save_model(self, iteration_no=None):
+        if iteration_no is not None:
+            model_fname = self.model_fname + '.' + str(iteration_no)
+        else:
+            model_fname = self.model_fname
+
+        with open(model_fname, 'w') as model_f:
             pickle.dump(self.__dict__, model_f)
 
     def print_model(self):
@@ -1219,10 +1229,57 @@ class ClusterModel:
             block_ids = sorted(param_info[DYNAMICS_JUMP_POSTERIORS])
 
             # # update the priors
+
             for t in xrange(n_timepoints - 1):
+
                 total_p = sum(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] for d in xrange(self.n_dynamics))
+
+                new_priors = [(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p) for d in xrange(self.n_dynamics)]
+
+                while any(p < self.min_dynamic_prior for p in new_priors):
+                    # check which priors go below the minimum dynamic prior set by the user
+                    dyns_to_update = [p > self.min_dynamic_prior for p in new_priors]
+
+                    # compute the total posterior for the priors that will be updated since their updates
+                    # are larger than the minimum prior
+                    total_p_for_dyns_to_update = sum(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t]
+                                                     for d in xrange(self.n_dynamics)
+                                                     if dyns_to_update[d])
+
+                    # count the number of dynamics for which the prior will be fixed to the minimum prior
+                    n_dyns_to_fix = len([_d for _d in dyns_to_update if not _d])
+                    if n_dyns_to_fix > 0:
+                        echo('At time point', t, ', priors for the following dynamics will be set to',
+                             self.min_dynamic_prior, ':',
+                             [self.dynamics[_d] for _d in xrange(self.n_dynamics) if not dyns_to_update[_d]]
+                             )
+                        # echo([(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p)
+                        #               for d in xrange(self.n_dynamics)])
+                    # compute the denominator for the rest of the priors that will be updated
+                    _lambda = total_p_for_dyns_to_update / (1 - n_dyns_to_fix * self.min_dynamic_prior)
+
+                    for d in xrange(self.n_dynamics):
+                        if dyns_to_update[d]:
+                            new_priors[d] = param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / _lambda
+                        else:
+                            new_priors[d] = self.min_dynamic_prior
+
                 for d in xrange(self.n_dynamics):
-                    self.dynamic_priors[d][t] = param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p
+                    self.dynamic_priors[d][t] = new_priors[d]
+
+                # for d in xrange(self.n_dynamics):
+                #
+                #     # self.dynamic_priors[d][t] = param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p
+                #
+                #     # this update assumes a Dirichlet prior on the dynamics priors with a pseudo_count that matches
+                #     # the desired minimum prior set by the user
+                #
+                #     n_blocks = len(blocks)
+                #     pseudo_count = 1 + (2 * n_blocks * self.min_dynamic_prior) / (1 - self.n_dynamics * self.min_dynamic_prior)
+                #     self.dynamic_priors[d][t] = ((param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] + pseudo_count - 1)
+                #                                  / (total_p + (pseudo_count - 1) * self.n_dynamics))
+
+
             #
             #
             # # # update the boundary movement parameters
@@ -1315,6 +1372,7 @@ class ClusterModel:
             if not bruteforce_debug:
                 self.print_model()
                 self.save_model()
+                # self.save_model(EM_iteration)
 
             echo('EM delta:', delta, level=echo_level)
             if delta_likelihood < MIN_DELTA_LOG_LIKELIHOOD:
@@ -2583,7 +2641,9 @@ def call_boundary_dynamics(blocks,
                            aligned_fnames,
                            out_prefix,
                            fdr_for_decoding=0.05,
-                           output_empty_blocks=False):
+                           output_empty_blocks=False,
+                           update_priors=True,
+                           min_dynamic_prior=0.0):
 
     _blk = blocks.values()[0]
     n_timepoints = len(_blk[FOREGROUND_SIGNAL])
@@ -2594,7 +2654,7 @@ def call_boundary_dynamics(blocks,
     echo('Blocks longer than %d bins:' % max_region_length,
          len([1 for b in blocks.itervalues() if b[BLOCK_LENGTH] > max_region_length]))
 
-    echo('Sub-peak blocks :' , len([b for b in blocks if blocks[b][IS_SUBPEAK]]))
+    echo('Sub-peak blocks :', len([b for b in blocks if blocks[b][IS_SUBPEAK]]))
 
     echo('n_timepoints:', n_timepoints)
     echo('n_covariates:', n_covariates)
@@ -2612,7 +2672,9 @@ def call_boundary_dynamics(blocks,
                             n_threads,
                             max_region_length,
                             bin_size=bin_size,
-                            n_covariates=n_covariates)
+                            n_covariates=n_covariates,
+                            update_priors=update_priors,
+                            min_dynamic_prior=min_dynamic_prior)
 
     if model_fname is not None:
         theModel.init_from_file(model_fname)

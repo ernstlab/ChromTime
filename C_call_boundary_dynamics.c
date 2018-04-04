@@ -134,6 +134,16 @@ int calculate_signal_cache(int * block_fgr,
             }
         }
     }
+
+
+    // adding the uniform prior for the first time point
+    for (int start = 0; start < block_length + 1; start ++) {
+        for (int end = start; end < block_length + 1; end ++ ) {
+            ldouble prior = -log(block_length + 1);
+            emission_cache[0][start][end] += 2 * prior;
+        }
+    }
+
     return SUCCESS;
 }
 
@@ -197,6 +207,12 @@ int calculate_signal_cache_split(  int * block_fgr,
             cur_cache[end] = peak_log_prob + right_flanking_log_prob;
         }
     }
+
+    // adding the uniform prior for the first time point
+    for (int end = 0; end < block_length + 1; end ++ ) {
+        emission_cache[0][end] += -log(block_length + 1);
+    }
+
     return SUCCESS;
 }
 
