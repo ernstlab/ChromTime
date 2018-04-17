@@ -74,6 +74,7 @@ elapsed.stime = datetime.datetime.now()
 def open_log(fname):
     """ Opens a log file
     """
+    open_log.logfname = fname
     open_log.logfile = open(fname, 'w', 1)
 
 

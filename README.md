@@ -16,29 +16,41 @@ After the compilation has finished, you should be able to run ChromTime by typin
     $ python ChromTime.py
     usage: ChromTime.py [-h] [-a ALIGNED_FNAMES [ALIGNED_FNAMES ...]]
                         [-c CONTROL_FNAMES [CONTROL_FNAMES ...]] [-i ORDER_FNAME]
-                        [-g GENOME] [-o DIRECTORY] [-p PREFIX] [-b INT] [-t INT]
-                        [-s SHIFT] [-q FDR_FOR_DECODING]
-                        [--q-value-seed Q_VALUE_SEED]
+                        [-m {punctate,narrow,broad}] [-g GENOME] [-o DIRECTORY]
+                        [-p PREFIX] [-b INT] [-t INT] [-s SHIFT]
+                        [-q FDR_FOR_DECODING] [--q-value-seed Q_VALUE_SEED]
                         [--p-value-extend P_VALUE_EXTEND]
                         [--min-expected-reads MIN_EXPECTED_READS]
-                        [--min-gap MIN_GAP] [-n INT] [-m FILE] [-d FILE]
-                        [--skip-training] [--merge-peaks]
-                        [--no-output-signal-files] [--broad] [--atac]
+                        [--min-gap MIN_GAP] [--merge-peaks]
+                        [--min-dynamic-prior MIN_DYNAMIC_PRIOR]
+                        [--model-file FILE] [--data-file FILE] [--skip-training]
+                        [-n INT] [--output-signal-files]
     
     ChromTime: Modeling Spatio-temporal Dynamics of Chromatin Marks
     
     optional arguments:
       -h, --help            show this help message and exit
+    
+    Input data from command line:
       -a ALIGNED_FNAMES [ALIGNED_FNAMES ...], --aligned-reads ALIGNED_FNAMES [ALIGNED_FNAMES ...]
-                            Bed files with aligned reads for each time point in
+                            BED files with aligned reads for each time point in
                             the correct order
       -c CONTROL_FNAMES [CONTROL_FNAMES ...], --control-reads CONTROL_FNAMES [CONTROL_FNAMES ...]
-                            Bed files with aligned reads for control (input) for
+                            BED files with aligned reads for control (input) for
                             each time point in the correct order
+    
+    Input data from order file:
       -i ORDER_FNAME, --input-order-file ORDER_FNAME
-                            A file with paths to files with foreground and control
-                            aligned reads - one line per time point, in the right
-                            order.
+                            A tab-separated file with paths to files with
+                            foreground and control aligned reads - one line per
+                            time point, in the right order.
+    
+    Options:
+      -m {punctate,narrow,broad}, --mode {punctate,narrow,broad}
+                            punctate: equivalent to "-b 200 --min-gap 600 --min-
+                            dynamic-prior 0.05", narrow (default): equivalent to
+                            "-b 200 --min-gap 600 --min-dynamic-prior 0", broad:
+                            equivalent to "-b 500 --min-gap 1500 --merge-peaks"
       -g GENOME, --genome GENOME
                             Genome. One of: [hg18, hg19, mm10, mm9, zv9] or path
                             to a file with chromosome sizes one per line
@@ -64,23 +76,20 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             component (Default: 1)
       --min-gap MIN_GAP     Minimum gap between significant regions before they
                             are joined (Default: 600)
+      --merge-peaks         Merge significant peaks across time points instead of
+                            splitting them (Default: False)
+      --min-dynamic-prior MIN_DYNAMIC_PRIOR
+                            Minimum prior probability for each dynamic at each
+                            time point (Default: 0.0)
+      --model-file FILE     Pickled model to load
+      --data-file FILE      Pickled data to load
+      --skip-training       Skip EM training (Default: False)
       -n INT, --n-training-examples INT
                             Number of training examples to use. (Default: 10000)
-      -m FILE, --model-file FILE
-                            Pickled model file to load a learned the model from
-      -d FILE, --data-file FILE
-                            Pickled data file to load
-      --skip-training       Skip EM training (False)
-      --merge-peaks         Merge significant peaks across time points instead of
-                            splitting them (False)
-      --no-output-signal-files
-                            Do not output signal files for each time point in
-                            wiggle format (False)
-      --broad               Use default settings for broad marks. Equivalent to
-                            "-b 500 --min-gap 1500 --merge-peaks" (False)
-      --atac                Use default settings for ATAC-seq marks. Equivalent to
-                            "-b 50 --min-gap 150 -s 5 " (False). This option has
-                            not been tested extensively, so use with caution.
+      --output-signal-files
+                            Output signal files for each time point in wiggle
+                            format (Default: False)
+
     
 ## Input
 

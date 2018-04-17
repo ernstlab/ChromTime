@@ -606,123 +606,135 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='ChromTime: Modeling Spatio-temporal Dynamics of Chromatin Marks')
 
-    parser.add_argument('-a',
-                        '--aligned-reads',
-                        dest='aligned_fnames',
-                        nargs='+',
-                        help='Bed files with aligned reads for each time point in the correct order')
 
-    parser.add_argument('-c',
-                        '--control-reads',
-                        dest='control_fnames',
-                        nargs='+',
-                        help='Bed files with aligned reads for control (input) for each time point in the correct order')
+    g1 = parser.add_argument_group('Input data from command line')
+    g1.add_argument('-a',
+                    '--aligned-reads',
+                    dest='aligned_fnames',
+                    nargs='+',
+                    help='BED files with aligned reads for each time point in the correct order')
 
-    parser.add_argument('-i',
-                        '--input-order-file',
-                        dest='order_fname',
-                        help='A file with paths to files with foreground and control aligned reads '
-                             '- one line per time point, in the right order.')
+    g1.add_argument('-c',
+                    '--control-reads',
+                    dest='control_fnames',
+                    nargs='+',
+                    help='BED files with aligned reads for control (input) for each time point in the correct order')
 
-    parser.add_argument("-g", "--genome", dest="genome",
-                        help="Genome. One of: [%s] or path to a file with chromosome sizes one per line"
-                           % ', '.join(fname.replace('.txt', '') for fname in os.listdir(GENOMES_DIR)))
+    g2 = parser.add_argument_group('Input data from order file')
+    g2.add_argument('-i',
+                    '--input-order-file',
+                    dest='order_fname',
+                    help='A tab-separated file with paths to files with foreground and control aligned reads '
+                         '- one line per time point, in the right order.')
 
-    parser.add_argument("-o", "--output-dir", dest="out_dir",
-                        help="Output directory", metavar="DIRECTORY")
+    g3 = parser.add_argument_group('Options')
+    g3.add_argument('-m',
+                    '--mode',
+                    dest='mode',
+                    choices=['punctate', 'narrow', 'broad'],
+                    default='narrow',
+                    help='punctate: equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0.05\", '
+                         'narrow (default): equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0\", '
+                         'broad: equivalent to \"-b 500 --min-gap 1500 --merge-peaks\"')
 
-    parser.add_argument("-p", "--prefix", dest="prefix",
-                        help="prefix for the output files")
+    g3.add_argument("-g", "--genome", dest="genome",
+                    help="Genome. One of: [%s] or path to a file with chromosome sizes one per line"
+                       % ', '.join(fname.replace('.txt', '') for fname in os.listdir(GENOMES_DIR)))
 
-    parser.add_argument("-b", "--bin-size", type=int, dest="bin_size", default=200,
-                        help="Bin size in base pairs (Default: %(default)s)", metavar="INT")
+    g3.add_argument("-o", "--output-dir", dest="out_dir",
+                    help="Output directory", metavar="DIRECTORY")
 
-    parser.add_argument("-t", "--threads", type=int, dest="n_threads", default=1,
-                        help="Number of threads to use (Default: %(default)s)",
-                        metavar="INT")
+    g3.add_argument("-p", "--prefix", dest="prefix",
+                    help="prefix for the output files")
 
-    parser.add_argument('-s',
-                        '--shift',
-                        type=int,
-                        dest='shift',
-                        help='Number of bases to shift each read (Default: %(default)s)',
-                        default=100)
+    g3.add_argument("-b", "--bin-size", type=int, dest="bin_size", default=200,
+                    help="Bin size in base pairs (Default: %(default)s)", metavar="INT")
 
-    parser.add_argument('-q',
-                        '--q-value',
-                        type=float,
-                        dest='fdr_for_decoding',
-                        help='False discovery rate (Q-value) for calling peaks at each time point (Default: %(default)s)',
-                        default=0.05)
+    g3.add_argument("-t", "--threads", type=int, dest="n_threads", default=1,
+                    help="Number of threads to use (Default: %(default)s)",
+                    metavar="INT")
 
-    parser.add_argument('--q-value-seed',
-                        type=float,
-                        dest='q_value_seed',
-                        help='FDR threshold to call significant bins (Default: %(default)s)',
-                        default=0.05)
+    g3.add_argument('-s',
+                    '--shift',
+                    type=int,
+                    dest='shift',
+                    help='Number of bases to shift each read (Default: %(default)s)',
+                    default=100)
 
-    parser.add_argument('--p-value-extend',
-                        type=float,
-                        dest='p_value_extend',
-                        help='FDR threshold to call significant bins (Default: %(default)s)',
-                        default=0.15)
+    g3.add_argument('-q',
+                    '--q-value',
+                    type=float,
+                    dest='fdr_for_decoding',
+                    help='False discovery rate (Q-value) for calling peaks at each time point (Default: %(default)s)',
+                    default=0.05)
 
-    parser.add_argument('--min-expected-reads',
-                        type=int,
-                        dest='min_expected_reads',
-                        help='Minimum expected reads per bin for the background component (Default: %(default)s)',
-                        default=1)
+    g3.add_argument('--q-value-seed',
+                    type=float,
+                    dest='q_value_seed',
+                    help='FDR threshold to call significant bins (Default: %(default)s)',
+                    default=0.05)
 
-    parser.add_argument('--min-gap',
-                        type=int,
-                        dest='min_gap',
-                        help='Minimum gap between significant regions before they are joined (Default: %(default)s)',
-                        default=600)
+    g3.add_argument('--p-value-extend',
+                    type=float,
+                    dest='p_value_extend',
+                    help='FDR threshold to call significant bins (Default: %(default)s)',
+                    default=0.15)
 
-    parser.add_argument("-n",
-                        "--n-training-examples",
-                        type=int,
-                        dest="n_training_examples",
-                        default=10000,
-                        help="Number of training examples to use. (Default: %(default)s)",
-                        metavar="INT")
+    g3.add_argument('--min-expected-reads',
+                    type=int,
+                    dest='min_expected_reads',
+                    help='Minimum expected reads per bin for the background component (Default: %(default)s)',
+                    default=1)
 
-    parser.add_argument("-m", "--model-file", dest="model_fname",
-                        help="Pickled model file to load a learned the model from", metavar="FILE")
+    g3.add_argument('--min-gap',
+                    type=int,
+                    dest='min_gap',
+                    help='Minimum gap between significant regions before they are joined (Default: %(default)s)',
+                    default=600)
 
-    parser.add_argument("-d", "--data-file", dest="data_fname",
-                        help="Pickled data file to load", metavar="FILE")
 
-    parser.add_argument("--skip-training", action="store_true", dest="skip_training", default=False,
-                        help="Skip EM training (%(default)s)")
+    g3.add_argument("--merge-peaks", action="store_true", dest="merge_peaks", default=False,
+                    help="Merge significant peaks across time points instead of splitting them (Default: %(default)s)")
 
-    parser.add_argument("--merge-peaks", action="store_true", dest="merge_peaks", default=False,
-                        help="Merge significant peaks across time points instead of splitting them (%(default)s)")
+    g3.add_argument("--min-dynamic-prior",
+                    type=float,
+                    dest="min_dynamic_prior",
+                    default=0.0,
+                    help="Minimum prior probability for each dynamic at each time point (Default: %(default)s)")
 
-    parser.add_argument("--no-output-signal-files", action="store_true", dest="no_output_signal_files", default=False,
-                        help="Do not output signal files for each time point in wiggle format (%(default)s)")
+    g3.add_argument("--model-file", dest="model_fname",
+                    help="Pickled model to load",
+                    metavar="FILE")
+
+    g3.add_argument("--data-file", dest="data_fname",
+                    help="Pickled data to load",
+                    metavar="FILE")
+
+    g3.add_argument("--skip-training", action="store_true", dest="skip_training", default=False,
+                    help="Skip EM training (Default: %(default)s)")
+
+    g3.add_argument("-n",
+                    "--n-training-examples",
+                    type=int,
+                    dest="n_training_examples",
+                    default=10000,
+                    help="Number of training examples to use. (Default: %(default)s)",
+                    metavar="INT")
+
+    g3.add_argument("--output-signal-files", action="store_true", dest="output_signal_files", default=False,
+                    help="Output signal files for each time point in wiggle format (Default: %(default)s)")
+
+    # below are legacy options
 
     parser.add_argument("--broad", action="store_true", dest="broad", default=False,
-                        help="Use default settings for broad marks. "
-                             "Equivalent to \"-b 500 --min-gap 1500 --merge-peaks\" (%(default)s)")
-
-    parser.add_argument("--atac", action="store_true", dest="atac", default=False,
-                        # help=argparse.SUPPRESS,
-                        help="Use default settings for ATAC-seq marks. "
-                             "Equivalent to \"-b 50 --min-gap 150 -s 5 \" (%(default)s). "
-                             "This option has not been tested extensively, so use with caution."
-                        )
+                        # help="Use default settings for broad marks. "
+                        #      "Equivalent to \"-b 500 --min-gap 1500 --merge-peaks\" (%(default)s)",
+                        help=argparse.SUPPRESS)
 
     parser.add_argument("--output_empty_blocks", action="store_true", dest="output_empty_blocks", default=False,
                         help=argparse.SUPPRESS)
 
     parser.add_argument("--keep-fixed-priors", action="store_true", dest="keep_fixed_priors", default=False,
-                        help=argparse.SUPPRESS)
-
-    parser.add_argument("--min-dynamic-prior",
-                        type=float,
-                        dest="min_dynamic_prior",
-                        default=0.0,
                         help=argparse.SUPPRESS)
 
     parser.add_argument("--use-broad-window-for-background",
@@ -738,16 +750,28 @@ if __name__ == '__main__':
         parser.print_help()
         exit(0)
 
-    if args.broad:
+    if args.broad or args.mode == 'broad':
         args.bin_size = 500
         args.min_gap = 1500
         args.merge_peaks = True
 
-    elif args.atac:
-        args.bin_size = 50
-        args.min_gap = 150
+    elif args.mode == 'punctate':
+        args.bin_size = 200
+        args.min_gap = 600
         args.merge_peaks = False
-        args.shift = 5
+        args.min_dynamic_prior = 0.05
+    elif args.mode == 'narrow':
+        args.bin_size = 200
+        args.min_gap = 600
+        args.merge_peaks = False
+        args.min_dynamic_prior = 0
+
+
+    # elif args.atac:
+    #     args.bin_size = 50
+    #     args.min_gap = 150
+    #     args.merge_peaks = False
+    #     args.shift = 5
 
     bin_size = args.bin_size
     min_gap = args.min_gap
@@ -835,7 +859,7 @@ if __name__ == '__main__':
                                             min_gap=min_gap / bin_size,
                                             out_prefix=out_prefix,
                                             chrom_lengths=chrom_lengths,
-                                            output_signal_files=not args.no_output_signal_files,
+                                            output_signal_files=args.output_signal_files,
                                             min_expected_reads=args.min_expected_reads,
                                             use_broad_window_for_background=args.use_broad_window_for_background)
 

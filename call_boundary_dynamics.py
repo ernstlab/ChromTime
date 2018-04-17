@@ -169,6 +169,7 @@ class ClusterModel:
 
         self.n_dynamics = len(self.dynamics)
 
+        self.out_prefix = out_prefix
         self.model_fname = out_prefix + '.model.pickle'
 
         self.reset_model()
@@ -1217,7 +1218,11 @@ class ClusterModel:
                     if bruteforce_debug:
                         echo('delta log likelihood=', delta_likelihood, '\tblocks:', blocks)
 
-                    echo('+' * 100, '\n', '+' * 100)
+                    echo('+' * 100, '\n', '+' * 100 + '\n\n' +
+                         'Please submit an issue report to: https://github.com/ernstlab/ChromTime/issues\n' +
+                         'In the issue report, please attach the ChromTime\'s log file: ' + open_log.logfname + '\n'
+                         'and the pickled data file: ' + self.out_prefix + '.data.pickle' + '\n\n')
+
                     raise DecreasingLikelihoodException("Decreasing likelihood. LL delta: " + str(delta_likelihood),
                                                         delta_likelihood,
                                                         blocks)
@@ -1236,6 +1241,7 @@ class ClusterModel:
 
                 new_priors = [(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p) for d in xrange(self.n_dynamics)]
 
+                # loop until all priors are updated to be equal to at least min_dinamic_prior
                 while any(p < self.min_dynamic_prior for p in new_priors):
                     # check which priors go below the minimum dynamic prior set by the user
                     dyns_to_update = [p > self.min_dynamic_prior for p in new_priors]
@@ -1251,10 +1257,11 @@ class ClusterModel:
                     if n_dyns_to_fix > 0:
                         echo('At time point', t, ', priors for the following dynamics will be set to',
                              self.min_dynamic_prior, ':',
-                             [self.dynamics[_d] for _d in xrange(self.n_dynamics) if not dyns_to_update[_d]]
-                             )
+                             [self.dynamics[_d] for _d in xrange(self.n_dynamics) if not dyns_to_update[_d]])
+
                         # echo([(param_info[TOTAL_POSTERIORS_PER_DYNAMIC][d][t] / total_p)
                         #               for d in xrange(self.n_dynamics)])
+
                     # compute the denominator for the rest of the priors that will be updated
                     _lambda = total_p_for_dyns_to_update / (1 - n_dyns_to_fix * self.min_dynamic_prior)
 
@@ -1292,7 +1299,7 @@ class ClusterModel:
                         block_dynamics_jump_posteriors = param_info[DYNAMICS_JUMP_POSTERIORS][block_id][dynamic]
                         for dist, weight in enumerate(block_dynamics_jump_posteriors[t]):
                             if dist > 0:
-
+                                # the response for the regression is dist - 1
                                 y.append(dist - 1)
                                 weights.append(weight)
                                 scale += weight
