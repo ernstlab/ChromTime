@@ -635,7 +635,7 @@ if __name__ == '__main__':
                     default='narrow',
                     help='punctate: equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0.05\", '
                          'narrow (default): equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0\", '
-                         'broad: equivalent to \"-b 500 --min-gap 1500 --merge-peaks\"')
+                         'broad: equivalent to \"-b 500 --min-gap 1500 --merge-peaks --min-dynamic-prior 0\"')
 
     g3.add_argument("-g", "--genome", dest="genome",
                     help="Genome. One of: [%s] or path to a file with chromosome sizes one per line"
@@ -754,6 +754,7 @@ if __name__ == '__main__':
         args.bin_size = 500
         args.min_gap = 1500
         args.merge_peaks = True
+        args.min_dynamic_prior = 0
 
     elif args.mode == 'punctate':
         args.bin_size = 200
