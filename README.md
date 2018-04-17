@@ -50,7 +50,8 @@ After the compilation has finished, you should be able to run ChromTime by typin
                             punctate: equivalent to "-b 200 --min-gap 600 --min-
                             dynamic-prior 0.05", narrow (default): equivalent to
                             "-b 200 --min-gap 600 --min-dynamic-prior 0", broad:
-                            equivalent to "-b 500 --min-gap 1500 --merge-peaks"
+                            equivalent to "-b 500 --min-gap 1500 --merge-peaks
+                            --min-dynamic-prior 0"
       -g GENOME, --genome GENOME
                             Genome. One of: [hg18, hg19, mm10, mm9, zv9] or path
                             to a file with chromosome sizes one per line
