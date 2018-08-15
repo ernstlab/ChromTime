@@ -191,3 +191,8 @@ For example:
     t_cell_development.H3K4ME2.log
 
 
+## Citation
+
+Our paper about the ChromTime method got published in the journal Genome Biology. Link: https://rdcu.be/4lna
+
+Fiziev P, Ernst J. ChromTime: modeling spatio-temporal dynamics of chromatin marks. Genome Biology, 19:109, 2018.
