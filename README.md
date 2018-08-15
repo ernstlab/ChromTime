@@ -193,6 +193,6 @@ For example:
 
 ## Citation
 
-Our paper about the ChromTime method got published in the journal Genome Biology. Link: https://rdcu.be/4lna
-
 Fiziev P, Ernst J. ChromTime: modeling spatio-temporal dynamics of chromatin marks. Genome Biology, 19:109, 2018.
+
+Link to publication: https://rdcu.be/4lna
