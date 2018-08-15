@@ -193,7 +193,7 @@ For example:
 
 ## Citation
 
-Fiziev P, Ernst J. ChromTime: modeling spatio-temporal dynamics of chromatin marks. Genome Biology, 19:109, 2018.
 
-Link to publication: https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1485-2
+[Fiziev P, Ernst J. ChromTime: modeling spatio-temporal dynamics of chromatin marks. Genome Biology, 19:109, 2018.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1485-2)
+
 
