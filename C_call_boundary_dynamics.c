@@ -497,6 +497,12 @@ int EM_step (int * block_fgr,
                               B);
     }
 
+    if (fwd_status != SUCCESS || bck_status != SUCCESS) {
+        status = E_UNDERFLOW;
+        goto CLEANUP;
+    }
+
+
     // compute the log likelihood of the block
 
     *log_likelihood = -INF;

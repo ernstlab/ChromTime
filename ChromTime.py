@@ -42,17 +42,38 @@ def read_aligned_reads(reads_fname, shift, bin_size, chrom_lengths=None):
     skipped = 0
     with open_file(reads_fname) as in_f:
         for line in in_f:
+            if line.startswith('#'):
+                continue
+
             buf = line.strip().split()
+
+            if len(buf) < 4:
+                error('Incorrect format of input file:', reads_fname + '\nLine: ' + line +
+                      'Aligned reads should be in BED format: \n'
+                      '"chromosome\tstart\tend\tstrand" or "chromosome\tstart\tend\tname\tscore\tstrand"')
 
             chrom = buf[0]
 
-            start = int(buf[1])
-            end = int(buf[2])
+            try:
+                start = int(buf[1])
+            except ValueError:
+                error("Start coordinate should be integer:", line)
+
+            try:
+                end = int(buf[2])
+            except ValueError:
+                error("End coordinate should be integer:", line)
+
+            if end < start:
+                error('Start coordinate is greater than end coordinate for line:', line)
 
             if len(buf) == 4:
                 strand = buf[3]
             else:
                 strand = buf[5]
+
+            if strand not in ['+', '-']:
+                error('Strand should be one of [+, -]:', line)
 
             if strand == '+':
                 read_start = (start + shift) / bin_size
