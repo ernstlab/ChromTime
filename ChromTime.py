@@ -40,6 +40,8 @@ def read_aligned_reads(reads_fname, shift, bin_size, chrom_lengths=None):
 
     echo('Reading reads from:', reads_fname)
     skipped = 0
+    skipped_chromosomes = set()
+
     with open_file(reads_fname) as in_f:
         for line in in_f:
             if line.startswith('#'):
@@ -81,6 +83,10 @@ def read_aligned_reads(reads_fname, shift, bin_size, chrom_lengths=None):
                 read_start = (end - shift) / bin_size
 
             if chrom not in read_counts or read_start < 0 or read_start >= len(read_counts[chrom]):
+
+                if chrom not in read_counts:
+                    skipped_chromosomes.add(chrom)
+
                 skipped += 1
                 continue
 
@@ -89,7 +95,17 @@ def read_aligned_reads(reads_fname, shift, bin_size, chrom_lengths=None):
 
     echo('Total reads used for peak calling:', total_reads)
     if skipped > 0:
-        echo('Skipped reads outside of chromosome boundaries:', skipped)
+        echo('WARNING: Skipped reads outside of chromosome boundaries:', skipped)
+
+        if len(skipped_chromosomes) > 0:
+            echo('WARNING: Input file contains reads from non-standard chromosomes, which will be skipped:',
+                 str(sorted(skipped_chromosomes)) + '\nStandard chromosomes for this genome assembly are:',
+                 sorted(chrom_lengths))
+
+    if total_reads == 0:
+        error(reads_fname, 'has no sequencing reads that map to standard chromosomes for this genome assembly. '
+              'Please check the input file!')
+
     return read_counts, total_reads
 
 
