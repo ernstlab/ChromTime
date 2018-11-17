@@ -94,6 +94,7 @@ def read_aligned_reads(reads_fname, shift, bin_size, chrom_lengths=None):
             total_reads += 1
 
     echo('Total reads used for peak calling:', total_reads)
+
     if skipped > 0:
         echo('WARNING: Skipped reads outside of chromosome boundaries:', skipped)
 
