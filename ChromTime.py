@@ -644,7 +644,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='ChromTime: Modeling Spatio-temporal Dynamics of Chromatin Marks')
 
-
     g1 = parser.add_argument_group('Input data from command line')
     g1.add_argument('-a',
                     '--aligned-reads',
@@ -670,9 +669,9 @@ if __name__ == '__main__':
                     '--mode',
                     dest='mode',
                     choices=['punctate', 'narrow', 'broad'],
-                    default='narrow',
+                    default=None,
                     help='punctate: equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0.05\", '
-                         'narrow (default): equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0\", '
+                         'narrow: equivalent to \"-b 200 --min-gap 600 --min-dynamic-prior 0\", '
                          'broad: equivalent to \"-b 500 --min-gap 1500 --merge-peaks --min-dynamic-prior 0\"')
 
     g3.add_argument("-g", "--genome", dest="genome",
