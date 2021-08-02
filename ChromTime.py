@@ -921,6 +921,7 @@ if __name__ == '__main__':
                            fdr_for_decoding=args.fdr_for_decoding,
                            output_empty_blocks=args.output_empty_blocks,
                            update_priors=not args.keep_fixed_priors,
-                           min_dynamic_prior=args.min_dynamic_prior)
+                           min_dynamic_prior=args.min_dynamic_prior,
+                           ignore_decreasing_LL_error=True)
 
     close_log()

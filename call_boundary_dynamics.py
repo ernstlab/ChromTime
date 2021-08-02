@@ -1139,8 +1139,8 @@ class ClusterModel:
 
         print >>sys.stderr, "\n"
         self.fdr_threshold_for_decoding = [None] * self.n_timepoints
-
         for t in xrange(self.n_timepoints):
+
             sorted_no_peak_probs = sorted(no_peak_probs[t])
             n = len(sorted_no_peak_probs)
 
@@ -1151,7 +1151,7 @@ class ClusterModel:
 
         echo('FDR threshold for decoding:', self.fdr_threshold_for_decoding)
 
-    def EM(self, blocks, MIN_DELTA_LOG_LIKELIHOOD=None, echo_level=ECHO_TO_SCREEN, bruteforce_debug=False):
+    def EM(self, blocks, MIN_DELTA_LOG_LIKELIHOOD=None, echo_level=ECHO_TO_SCREEN, bruteforce_debug=False, ignore_decreasing_LL_error=False):
 
         n_timepoints = self.n_timepoints
 
@@ -1213,6 +1213,11 @@ class ClusterModel:
                 echo('EM Iteration: %d\tDelta Log Likelihood:' % EM_iteration, delta_likelihood, level=echo_level)
 
                 if delta_likelihood < 0:
+
+                    if ignore_decreasing_LL_error:
+                        echo('WARNING: Log likelihood has decreased. Stopping EM.')
+                        break
+
                     echo('**** ERROR!!! ****')
 
                     if bruteforce_debug:
@@ -2650,7 +2655,8 @@ def call_boundary_dynamics(blocks,
                            fdr_for_decoding=0.05,
                            output_empty_blocks=False,
                            update_priors=True,
-                           min_dynamic_prior=0.0):
+                           min_dynamic_prior=0.0,
+                           ignore_decreasing_LL_error=False):
 
     _blk = blocks.values()[0]
     n_timepoints = len(_blk[FOREGROUND_SIGNAL])
@@ -2689,7 +2695,8 @@ def call_boundary_dynamics(blocks,
     theModel.print_model()
 
     if not skip_training:
-        theModel.EM(dict((block_id, blocks[block_id]) for block_id in block_ids_for_training))
+        theModel.EM(dict((block_id, blocks[block_id]) for block_id in block_ids_for_training),
+                    ignore_decreasing_LL_error=ignore_decreasing_LL_error)
         # theModel.EM_bruteforce_debug(dict((block_id, blocks[block_id]) for block_id in block_ids_for_training))
 
     # theModel.EM_bruteforce_debug(dict((block_id, blocks[block_id]) for block_id in block_ids_for_training),
